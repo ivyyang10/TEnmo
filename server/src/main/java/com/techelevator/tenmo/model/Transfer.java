@@ -1,11 +1,18 @@
 package com.techelevator.tenmo.model;
 
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 
 public class Transfer {
+   // @NotNull
     private int transferID;
+    //@NotBlank
     private int senderID;
+   // @NotBlank
     private int receiverID;
+    //@Min(value = 0, message = "transfer amount can't zero or negative amount ")
     private BigDecimal transferAmount;
     private String transferStatus;
 

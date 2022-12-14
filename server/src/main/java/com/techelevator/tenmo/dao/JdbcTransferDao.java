@@ -1,46 +1,46 @@
 package com.techelevator.tenmo.dao;
 
-import com.techelevator.tenmo.model.Account;
 import com.techelevator.tenmo.model.Transfer;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
 
-import java.math.BigDecimal;
+
+import java.security.Principal;
 
 @Component
 public class JdbcTransferDao implements TransferDao{
-    public JdbcTransferDao(JdbcAccountDao dao) {
-        this.dao = dao;
-    }
+
 
     private JdbcTemplate jdbcTemplate;
-     private JdbcAccountDao dao= new JdbcAccountDao(jdbcTemplate);
+     private JdbcAccountDao accountDao;
 
 
-    public JdbcTransferDao(JdbcTemplate jdbcTemplate) {
+    public JdbcTransferDao(JdbcTemplate jdbcTemplate, JdbcAccountDao accountDao) {
         this.jdbcTemplate = jdbcTemplate;
+        this.accountDao = accountDao;
     }
 
     @Override
-    public Transfer addTransfer(Transfer transfer) {
+    public Transfer addTransfer(Transfer transfer, Principal principal) {
         String sql="INSERT INTO tenmo_transfer(sender_id, receiver_id,transfer_amount,transfer_status) "+
-                "VALUES(?,?,?,'approved') RETURNING transfer_id;";
+                "VALUES(?,?,?,'Approved') RETURNING transfer_id;";
         Integer transferID=jdbcTemplate.queryForObject(sql,Integer.class,transfer.getSenderID(),transfer.getReceiverID(),
-                transfer.getTransferAmount(),transfer.getTransferStatus());
+                transfer.getTransferAmount());
+        transfer.setTransferID(transferID);
 
-        String sql1="SELECT username FROM tenmo_user " +
-                "JOIN account ON tenmo_user.user_id = account.user_id " +
-                "WHERE account.user_id =?;";
-        SqlRowSet receiverName = jdbcTemplate.queryForRowSet(sql1,transfer.getReceiverID());
+        //String sql1="SELECT username FROM tenmo_user " +
+               // "JOIN account ON tenmo_user.user_id = account.user_id " +
+               // "WHERE account.user_id =?;";
+        //SqlRowSet receiverName = jdbcTemplate.queryForRowSet(sql1,transfer.getReceiverID());
+       // String receiverName =(String) jdbcTemplate.queryForObject(sql1, String.class, transfer.getReceiverID());
+        //dao.balanceIncrease(receiverName,transfer.getTransferAmount());
 
-
-
+       // String senderName =(String) jdbcTemplate.queryForObject(sql1, String.class, transfer.getSenderID());
+        accountDao.balanceDecrease(principal.getName(),transfer.getTransferAmount());
 
 
         return getTransfer(transferID);
-
-
 
 
     }
