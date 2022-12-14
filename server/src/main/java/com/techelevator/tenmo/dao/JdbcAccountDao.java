@@ -33,7 +33,8 @@ public class JdbcAccountDao implements AccountDao{
     @Override
     public void balanceIncrease(String userName, BigDecimal transferAmount) {
         String sql ="UPDATE account SET balance= balance + ? " +
-                "WHERE user_id =(SELECT user_id FROM tenmo_user WHERE username ILIKE ?;" ;
+                "JOIN tenmo_transfer ON tenmo_transfer.receiver_id = account.user_id " +
+                "WHERE account.user_id =(SELECT user_id FROM tenmo_user WHERE username ILIKE ?;" ;
         jdbcTemplate.update(sql,transferAmount,userName);
 
 
@@ -42,7 +43,8 @@ public class JdbcAccountDao implements AccountDao{
     @Override
     public void balanceDecrease(String userName, BigDecimal transferAmount) {
         String sql ="UPDATE account SET balance= balance - ? " +
-                "WHERE user_id =(SELECT user_id FROM tenmo_user WHERE username ILIKE ?;" ;
+                "JOIN tenmo_transfer ON tenmo_transfer.sender_id = account.user_id " +
+                "WHERE account.user_id =(SELECT user_id FROM tenmo_user WHERE username ILIKE ?;" ;
         jdbcTemplate.update(sql,transferAmount,userName);
     }
 
