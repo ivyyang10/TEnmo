@@ -1,12 +1,15 @@
 package com.techelevator.tenmo.dao;
 
 import com.techelevator.tenmo.model.Transfer;
+import com.techelevator.tenmo.model.User;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
 
 
 import java.security.Principal;
+import java.util.ArrayList;
+import java.util.List;
 
 @Component
 public class JdbcTransferDao implements TransferDao{
@@ -20,7 +23,7 @@ public class JdbcTransferDao implements TransferDao{
         this.jdbcTemplate = jdbcTemplate;
         this.accountDao = accountDao;
     }
-
+///trying to figure out how to not send more than we have
     @Override
     public Transfer addTransfer(Transfer transfer) {
        // boolean transferSuccess = false;
@@ -36,6 +39,17 @@ public class JdbcTransferDao implements TransferDao{
             return getTransfer(transferID);
         }
 
+    @Override
+    public List<Transfer> getAllByUserId(int id) {
+        List<Transfer> transfers = new ArrayList<>();
+        String sql = "SELECT * FROM tenmo_transfer WHERE sender_id = ? OR receiver_id = ?";
+        SqlRowSet results = jdbcTemplate.queryForRowSet(sql, id, id);
+        while(results.next()) {
+            Transfer transfer = mapRowToTransfer(results);
+            transfers.add(transfer);
+        }
+        return transfers;
+    }
 
     @Override
     public Transfer getTransfer(int id) {
