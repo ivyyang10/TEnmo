@@ -5,6 +5,6 @@ import java.security.Principal;
 
 public interface TransferDao {
 
-    Transfer addTransfer(Transfer transfer, Principal principal);
+    Transfer addTransfer(Transfer transfer);
     Transfer getTransfer(int id);
 }

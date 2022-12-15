@@ -5,6 +5,7 @@ import java.math.BigDecimal;
 public interface AccountDao {
 
    BigDecimal getBalance(String userName);
-   void balanceIncrease(String userName, BigDecimal transferAmount);
-   void balanceDecrease(String userName, BigDecimal transferAmount);
+   void balanceIncrease(int userId, BigDecimal transferAmount);
+   void balanceDecrease(int userId, BigDecimal transferAmount);
+
 }

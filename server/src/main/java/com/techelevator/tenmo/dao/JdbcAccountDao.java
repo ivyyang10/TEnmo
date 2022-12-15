@@ -18,34 +18,32 @@ public class JdbcAccountDao implements AccountDao{
     }
 
     @Override
-    public BigDecimal getBalance(String username) {
+    public BigDecimal getBalance(String userName) {
         String sql ="SELECT balance From account " +
                 "JOIN tenmo_user ON account.user_id=tenmo_user.user-id " +
                 "WHERE username ILIKE ?;";
-        SqlRowSet rowSet = jdbcTemplate.queryForRowSet(sql, username);
+        SqlRowSet rowSet = jdbcTemplate.queryForRowSet(sql, userName);
        if(rowSet.next()){
            return mapRowToAccount(rowSet).getBalance();
        }
-        throw new UsernameNotFoundException("User " + username + " was not found.");
+        throw new UsernameNotFoundException("User " + userName + " was not found.");
 
     }
 
     @Override
-    public void balanceIncrease(String userName, BigDecimal transferAmount) {
-        String sql ="UPDATE account SET balance= balance + ? " +
-                "JOIN tenmo_transfer ON tenmo_transfer.receiver_id = account.user_id " +
-                "WHERE account.user_id =(SELECT user_id FROM tenmo_user WHERE username ILIKE ?;" ;
-        jdbcTemplate.update(sql,transferAmount,userName);
+    public void balanceIncrease(int userId, BigDecimal transferAmount) {
+        String sql ="UPDATE account SET balance = balance + ? " +
+                    "WHERE account.user_id = ?" ;
+        jdbcTemplate.update(sql,transferAmount, userId);
 
 
     }
 
     @Override
-    public void balanceDecrease(String userName, BigDecimal transferAmount) {
-        String sql ="UPDATE account SET balance= balance - ? " +
-                "JOIN tenmo_transfer ON tenmo_transfer.sender_id = account.user_id " +
-                "WHERE account.user_id =(SELECT user_id FROM tenmo_user WHERE username ILIKE ?;" ;
-        jdbcTemplate.update(sql,transferAmount,userName);
+    public void balanceDecrease(int userId, BigDecimal transferAmount) {
+        String sql ="UPDATE account SET balance = balance - ?" +
+                "WHERE account.user_id = ?" ;
+        jdbcTemplate.update(sql, transferAmount, userId);
     }
 
     private Account mapRowToAccount(SqlRowSet rs) {

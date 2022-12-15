@@ -1,6 +1,7 @@
 package com.techelevator.tenmo.controller;
 
 import com.techelevator.tenmo.dao.TransferDao;
+import com.techelevator.tenmo.dao.UserDao;
 import com.techelevator.tenmo.model.Transfer;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -15,14 +16,19 @@ import java.security.Principal;
 public class TransferController {
 
     private TransferDao transferDao;
+    private UserDao userDao;
 
-    public TransferController(TransferDao transferDao) {
+    public TransferController(TransferDao transferDao, UserDao userDao) {
         this.transferDao = transferDao;
+        this.userDao = userDao;
     }
 
     @ResponseStatus(HttpStatus.CREATED)
     @RequestMapping(path = "/transfer", method = RequestMethod.POST)
     public Transfer createNewTransfer(@Valid @RequestBody Transfer transfer, Principal principal){
-       return transferDao.addTransfer(transfer, principal);
+       String loggedInUser = principal.getName();
+       int userId = userDao.findIdByUsername(loggedInUser);
+       transfer.setSenderID(userId);
+       return transferDao.addTransfer(transfer);
     }
 }
