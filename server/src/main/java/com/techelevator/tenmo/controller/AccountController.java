@@ -25,6 +25,7 @@ public class AccountController {
         this.accountDao = accountDao;
         this.userDao = userDao;
     }
+    //Check account balance by username
     //@PreAuthorize("permitAll")
     @RequestMapping(path="/account/{username}", method = RequestMethod.GET)
     public BigDecimal getBalance(@PathVariable String username){

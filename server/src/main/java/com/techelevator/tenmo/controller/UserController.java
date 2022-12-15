@@ -19,6 +19,7 @@ public class UserController {
         this.userDao = userDao;
     }
 
+    //See username of all registered Users
     @RequestMapping(path = "/users", method = RequestMethod.GET)
     public List<String> getAllUsers(){
         return userDao.findAllUserNames();

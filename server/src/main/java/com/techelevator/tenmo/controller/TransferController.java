@@ -27,7 +27,7 @@ public class TransferController {
         this.userDao = userDao;
         this.accountDao = accountDao;
     }
-
+    //send transfer from logged in user
     @ResponseStatus(HttpStatus.CREATED)
     @RequestMapping(path = "/transfer", method = RequestMethod.POST)
     public Transfer createNewTransfer(@Valid @RequestBody Transfer transfer, Principal principal) {
@@ -45,13 +45,15 @@ public class TransferController {
         }
         }
 
-    @RequestMapping(path = "/transfer/username", method = RequestMethod.GET)
+   //list all transfers by logged in users
+    @RequestMapping(path = "/transfer/transfers", method = RequestMethod.GET)
     public List<Transfer> listAllByUserName(Principal principal){
     String loggedInUser = principal.getName();
     int userId = userDao.findIdByUsername(loggedInUser);
     return transferDao.getAllByUserId(userId);
     }
 
+    //get transfer by transfer id
     @RequestMapping (path = "/transfer/{id}", method = RequestMethod.GET)
     public Transfer getTransferById (@Valid @PathVariable int id){
             Transfer transfer = transferDao.getTransfer(id);
