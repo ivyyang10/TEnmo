@@ -1,5 +1,6 @@
 package com.techelevator.tenmo.controller;
 
+import com.techelevator.tenmo.dao.AccountDao;
 import com.techelevator.tenmo.dao.TransferDao;
 import com.techelevator.tenmo.dao.UserDao;
 import com.techelevator.tenmo.model.Transfer;
@@ -19,26 +20,36 @@ public class TransferController {
 
     private TransferDao transferDao;
     private UserDao userDao;
+    private AccountDao accountDao;
 
-    public TransferController(TransferDao transferDao, UserDao userDao) {
+    public TransferController(TransferDao transferDao, UserDao userDao, AccountDao accountDao) {
         this.transferDao = transferDao;
         this.userDao = userDao;
+        this.accountDao = accountDao;
     }
 
     @ResponseStatus(HttpStatus.CREATED)
     @RequestMapping(path = "/transfer", method = RequestMethod.POST)
-    public Transfer createNewTransfer(@Valid @RequestBody Transfer transfer, Principal principal){
-       String loggedInUser = principal.getName();
-       int userId = userDao.findIdByUsername(loggedInUser);
-       transfer.setSenderID(userId);
-       return transferDao.addTransfer(transfer);
-    }
+    public Transfer createNewTransfer(@Valid @RequestBody Transfer transfer, Principal principal) {
+        String loggedInUser = principal.getName();
+        int userId = userDao.findIdByUsername(loggedInUser);
+        transfer.setSenderID(userId);
+        if (accountDao.getBalanceById(transfer.getSenderID()).compareTo(transfer.getTransferAmount()) == -1) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Transfer Amount Exceeds Current Balance");
+        }
+        else if(transfer.getSenderID() == transfer.getReceiverID()){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Logged in user can't transfer to own account");
+        }
+        else {
+            return transferDao.addTransfer(transfer);
+        }
+        }
 
     @RequestMapping(path = "/transfer/username", method = RequestMethod.GET)
     public List<Transfer> listAllByUserName(Principal principal){
-        String loggedInUser = principal.getName();
-        int userId = userDao.findIdByUsername(loggedInUser);
-        return transferDao.getAllByUserId(userId);
+    String loggedInUser = principal.getName();
+    int userId = userDao.findIdByUsername(loggedInUser);
+    return transferDao.getAllByUserId(userId);
     }
 
     @RequestMapping (path = "/transfer/{id}", method = RequestMethod.GET)

@@ -19,8 +19,8 @@ public class JdbcAccountDao implements AccountDao{
 
     @Override
     public BigDecimal getBalance(String userName) {
-        String sql ="SELECT balance From account " +
-                "JOIN tenmo_user ON account.user_id=tenmo_user.user-id " +
+        String sql ="SELECT * From account " +
+                "JOIN tenmo_user ON account.user_id=tenmo_user.user_id " +
                 "WHERE username ILIKE ?;";
         SqlRowSet rowSet = jdbcTemplate.queryForRowSet(sql, userName);
        if(rowSet.next()){
@@ -31,12 +31,20 @@ public class JdbcAccountDao implements AccountDao{
     }
 
     @Override
+    public BigDecimal getBalanceById(int id){
+        String sql = "SELECT * FROM account " +
+                "WHERE user_id = ?;";
+        SqlRowSet rowSet = jdbcTemplate.queryForRowSet(sql, id);
+        if(rowSet.next()){
+            return mapRowToAccount(rowSet).getBalance();
+        }  throw new UsernameNotFoundException("User Id " + id + " was not found.");
+    }
+
+    @Override
     public void balanceIncrease(int userId, BigDecimal transferAmount) {
         String sql ="UPDATE account SET balance = balance + ? " +
                     "WHERE account.user_id = ?" ;
         jdbcTemplate.update(sql,transferAmount, userId);
-
-
     }
 
     @Override

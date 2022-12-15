@@ -1,6 +1,7 @@
 package com.techelevator.tenmo.controller;
 
 import com.techelevator.tenmo.dao.AccountDao;
+import com.techelevator.tenmo.dao.UserDao;
 import com.techelevator.tenmo.model.Account;
 import com.techelevator.tenmo.model.Transfer;
 import org.springframework.http.HttpStatus;
@@ -18,14 +19,16 @@ import java.security.Principal;
 @RestController
 public class AccountController {
     private AccountDao accountDao;
+    private UserDao userDao;
 
-    public AccountController(AccountDao accountDao) {
+    public AccountController(AccountDao accountDao, UserDao userDao) {
         this.accountDao = accountDao;
+        this.userDao = userDao;
     }
-
-    @RequestMapping(path="/account/{principal}", method = RequestMethod.GET)
-    public BigDecimal getBalance(@PathVariable Principal principal){
-        BigDecimal account = accountDao.getBalance(principal.getName());
+    //@PreAuthorize("permitAll")
+    @RequestMapping(path="/account/{username}", method = RequestMethod.GET)
+    public BigDecimal getBalance(@PathVariable String username){
+        BigDecimal account = accountDao.getBalance(username);
         if (account == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Account not found.");
         } else {
@@ -34,13 +37,3 @@ public class AccountController {
     }
 }
 
-//
-//    @RequestMapping(path="/account/{principal}", method = RequestMethod.GET)
-//    public BigDecimal getBalance(@PathVariable Principal principal){
-//        BigDecimal account = accountDao.getBalance(principal.getName());
-//        if (account == null) {
-//            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Account not found.");
-//        } else {
-//            return account;
-//        }
-//    }

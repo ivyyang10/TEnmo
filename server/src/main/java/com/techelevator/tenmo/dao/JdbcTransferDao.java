@@ -2,9 +2,11 @@ package com.techelevator.tenmo.dao;
 
 import com.techelevator.tenmo.model.Transfer;
 import com.techelevator.tenmo.model.User;
+import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
+import org.springframework.web.server.ResponseStatusException;
 
 
 import java.security.Principal;
@@ -26,19 +28,20 @@ public class JdbcTransferDao implements TransferDao{
 ///trying to figure out how to not send more than we have
     @Override
     public Transfer addTransfer(Transfer transfer) {
-       // boolean transferSuccess = false;
-        String sql="INSERT INTO tenmo_transfer(sender_id, receiver_id,transfer_amount,transfer_status) "+
+
+        String sql = "INSERT INTO tenmo_transfer(sender_id, receiver_id,transfer_amount,transfer_status) " +
                 "VALUES(?,?,?,'Approved') RETURNING transfer_id;";
-        Integer transferID=jdbcTemplate.queryForObject(sql,Integer.class,transfer.getSenderID(),transfer.getReceiverID(),
+        Integer transferID = jdbcTemplate.queryForObject(sql, Integer.class, transfer.getSenderID(), transfer.getReceiverID(),
                 transfer.getTransferAmount());
         transfer.setTransferID(transferID);
-        //if(accountDao.getBalance(transfer.getSenderID()).compareTo(transfer.getTransferAmount()) == 1) {
+       // if (accountDao.getBalanceById(transfer.getSenderID()).compareTo(transfer.getTransferAmount()) == -1) {
+            //throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Transfer Amount Exceeds Balance");
+      // } else {
             accountDao.balanceDecrease(transfer.getSenderID(), transfer.getTransferAmount());
             accountDao.balanceIncrease(transfer.getReceiverID(), transfer.getTransferAmount());
-            //transferSuccess = true;
             return getTransfer(transferID);
         }
-
+    //}
     @Override
     public List<Transfer> getAllByUserId(int id) {
         List<Transfer> transfers = new ArrayList<>();
