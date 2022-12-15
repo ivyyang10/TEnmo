@@ -1,8 +1,8 @@
 BEGIN TRANSACTION;
 
-DROP TABLE IF EXISTS tenmo_user, account;
+DROP TABLE IF EXISTS tenmo_transfer, tenmo_user, account;
 
-DROP SEQUENCE IF EXISTS seq_user_id, seq_account_id;
+DROP SEQUENCE IF EXISTS seq_transfer_id, seq_user_id, seq_account_id;
 
 -- Sequence to start user_id values at 1001 instead of 1
 CREATE SEQUENCE seq_user_id
@@ -34,10 +34,35 @@ CREATE TABLE account (
 );
 
 
+CREATE SEQUENCE seq_transfer_id
+ INCREMENT BY 1
+ START WITH 3001
+ NO MAXVALUE;
+
+ CREATE TABLE tenmo_transfer(
+     transfer_id int NOT NULL DEFAULT nextval('seq_transfer_id'),
+     sender_id int NOT NULL,
+     receiver_id int NOT NULL,
+     transfer_amount numeric(13, 2) NOT NULL,
+     transfer_status varchar(12),
+     CONSTRAINT PK_tenmo_transfer PRIMARY KEY (transfer_id),
+     CONSTRAINT FK_tenmo_transfer_sender_id FOREIGN KEY (sender_id) REFERENCES tenmo_user(user_id),
+     CONSTRAINT FK_temno_transfer_receiver_id FOREIGN KEY (receiver_id) REFERENCES tenmo_user(user_id),
+     CONSTRAINT CK_transfer_status CHECK (transfer_status IN ('Approved', 'Pending', 'Rejected'))
+);
 
 INSERT INTO tenmo_user (username, password_hash)
 VALUES ('bob', '$2a$10$G/MIQ7pUYupiVi72DxqHquxl73zfd7ZLNBoB2G6zUb.W16imI2.W2'),
        ('user', '$2a$10$Ud8gSvRS4G1MijNgxXWzcexeXlVs4kWDOkjE7JFIkNLKEuE57JAEy');
+
+--INSERT INTO account (user_id, balance)
+--VALUES(1001, 1000),
+--VALUES(1002, 1000);
+--
+--INSERT INTO transfer (sender_id, receiver_id, transfer_amount, transfer_status)
+--VALUES(1001, 1002, 50.00, 'Approved'),
+--VALUES(1002, 1001, 100.00, 'Approved');
+
 
 
 COMMIT;
