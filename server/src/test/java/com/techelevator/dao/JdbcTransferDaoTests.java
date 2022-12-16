@@ -30,7 +30,7 @@ public class JdbcTransferDaoTests extends BaseDaoTests {
 
    @Test
    public void addTransfer_return_correct_transfer(){
-    Transfer createdTransfer =dao.addTransfer(testTransfer);
+    Transfer createdTransfer =dao.sendTransfer(testTransfer);
     int newID =createdTransfer.getTransferID();
     BigDecimal balance = createdTransfer.getTransferAmount().setScale(0);
     createdTransfer.setTransferAmount(balance);

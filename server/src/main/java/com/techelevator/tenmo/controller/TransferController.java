@@ -32,7 +32,7 @@ public class TransferController {
     //send transfer from logged in user
     @ResponseStatus(HttpStatus.CREATED)
     @RequestMapping(path = "/transfer", method = RequestMethod.POST)
-    public Transfer createNewTransfer(@Valid @RequestBody Transfer transfer, Principal principal) {
+    public Transfer sendNewTransfer(@Valid @RequestBody Transfer transfer, Principal principal) {
         String loggedInUser = principal.getName();
         int userId = userDao.findIdByUsername(loggedInUser);
         transfer.setSenderID(userId);
@@ -46,9 +46,36 @@ public class TransferController {
 
             accountDao.balanceDecrease(transfer.getSenderID(), transfer.getTransferAmount());
             accountDao.balanceIncrease(transfer.getReceiverID(), transfer.getTransferAmount());
-            return transferDao.addTransfer(transfer);
+            return transferDao.sendTransfer(transfer);
         }
         }
+
+        @ResponseStatus(HttpStatus.CREATED)
+        @RequestMapping(path = "/transfer/request", method = RequestMethod.POST)
+        public Transfer requestTransfer(@Valid @RequestBody Transfer transfer, Principal principal){
+            String loggedInUser = principal.getName();
+            int userId = userDao.findIdByUsername(loggedInUser);
+            transfer.setSenderID(userId);
+            if(transfer.getSenderID() == transfer.getReceiverID()){
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Logged in user can't transfer to own account");
+            }
+            else {
+                return transferDao.sendTransferRequest(transfer);
+            }
+    }
+
+    @RequestMapping(path = "/transfer/{id}/reject", method = RequestMethod.PUT)
+    public void rejectTransfer(@Valid Transfer transfer, @PathVariable int id){
+    transferDao.rejectTransfer(transfer, id);
+    }
+
+    @RequestMapping(path = "/transfer/{id}/approve", method = RequestMethod.PUT)
+    public void acceptTransfer(@Valid Transfer transfer, @PathVariable int id, Principal principal) {
+        transferDao.approveTransfer(transfer, id);
+        accountDao.balanceDecrease(transfer.getSenderID(), transfer.getTransferAmount());
+        accountDao.balanceIncrease(transfer.getReceiverID(), transfer.getTransferAmount());
+    }
+
 
    //list all transfers by logged in users
     @RequestMapping(path = "/transfer/transfers", method = RequestMethod.GET)

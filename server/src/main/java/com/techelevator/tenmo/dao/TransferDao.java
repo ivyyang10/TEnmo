@@ -6,7 +6,10 @@ import java.util.List;
 
 public interface TransferDao {
 
-    Transfer addTransfer(Transfer transfer);
+    Transfer sendTransfer(Transfer transfer);
+    Transfer sendTransferRequest(Transfer transfer);
     Transfer getTransfer(int id);
+    void rejectTransfer(Transfer transfer, int id);
+    void approveTransfer(Transfer transfer, int id);
     List<Transfer> getAllByUserId(int id);
 }

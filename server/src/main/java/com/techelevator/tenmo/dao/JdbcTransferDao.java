@@ -30,7 +30,7 @@ public class JdbcTransferDao implements TransferDao{
 
     ///trying to figure out how to not send more than we have
     @Override
-    public Transfer addTransfer(Transfer transfer) {
+    public Transfer sendTransfer(Transfer transfer) {
 
         String sql = "INSERT INTO tenmo_transfer(sender_id, receiver_id,transfer_amount,transfer_status) " +
                 "VALUES(?,?,?,'Approved') RETURNING transfer_id;";
@@ -42,6 +42,36 @@ public class JdbcTransferDao implements TransferDao{
             //accountDao.balanceIncrease(transfer.getReceiverID(), transfer.getTransferAmount());
             return getTransfer(transferID);
         }
+
+        //SenderId is sending request
+        //receiverId is receiving this request
+        //Status will be pending
+
+    @Override
+    public Transfer sendTransferRequest(Transfer transfer) {
+        String sql = "INSERT INTO tenmo_transfer(sender_id, receiver_id,transfer_amount,transfer_status) " +
+                "VALUES(?,?,?,'Pending') RETURNING transfer_id;";
+        Integer transferID = jdbcTemplate.queryForObject(sql, Integer.class, transfer.getSenderID(), transfer.getReceiverID(),
+                transfer.getTransferAmount());
+        transfer.setTransferID(transferID);
+        //MOVED BELOW TO THE CONTROLLER TO ALLOW FOR BETTER TESTING
+        //accountDao.balanceDecrease(transfer.getSenderID(), transfer.getTransferAmount());
+        //accountDao.balanceIncrease(transfer.getReceiverID(), transfer.getTransferAmount());
+        return getTransfer(transferID);
+    }
+
+    @Override
+    public void rejectTransfer(Transfer transfer, int id){
+        String updateTransferSQL = "UPDATE tenmo_transfer SET transfer_status = 'Rejected' WHERE transfer_id = ?;";
+        jdbcTemplate.update(updateTransferSQL, id);
+    }
+
+    @Override
+    public void approveTransfer(Transfer transfer, int id){
+        String updateTransferSQL = "UPDATE tenmo_transfer SET transfer_status = 'Approved' WHERE transfer_id = ?;";
+        jdbcTemplate.update(updateTransferSQL, id);
+    }
+
 
     @Override
     public List<Transfer> getAllByUserId(int id) {
