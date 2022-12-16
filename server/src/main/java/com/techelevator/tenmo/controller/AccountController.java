@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
+import javax.validation.Valid;
 import java.math.BigDecimal;
 import java.security.Principal;
 
@@ -26,12 +27,11 @@ public class AccountController {
         this.userDao = userDao;
     }
     //Check account balance by username
-    //@PreAuthorize("permitAll")
-    @RequestMapping(path="/account/{username}", method = RequestMethod.GET)
-    public BigDecimal getBalance(@PathVariable String username){
-        BigDecimal account = accountDao.getBalance(username);
+    @RequestMapping(path="/account/balance", method = RequestMethod.GET)
+    public BigDecimal getBalance(Principal principal){
+        BigDecimal account = accountDao.getBalance(principal.getName());
         if (account == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Account not found.");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "NO Account Access");
         } else {
             return account;
         }

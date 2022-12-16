@@ -55,13 +55,13 @@ INSERT INTO tenmo_user (username, password_hash)
 VALUES ('bob', '$2a$10$G/MIQ7pUYupiVi72DxqHquxl73zfd7ZLNBoB2G6zUb.W16imI2.W2'),
        ('user', '$2a$10$Ud8gSvRS4G1MijNgxXWzcexeXlVs4kWDOkjE7JFIkNLKEuE57JAEy');
 
---INSERT INTO account (user_id, balance)
---VALUES(1001, 1000),
---VALUES(1002, 1000);
---
---INSERT INTO transfer (sender_id, receiver_id, transfer_amount, transfer_status)
---VALUES(1001, 1002, 50.00, 'Approved'),
---VALUES(1002, 1001, 100.00, 'Approved');
+INSERT INTO account (user_id, balance)
+VALUES(1001, 1000),
+(1002, 1000);
+
+INSERT INTO tenmo_transfer (sender_id, receiver_id, transfer_amount, transfer_status)
+VALUES(1001, 1002, 50.00, 'Approved'),
+(1002, 1001, 100.00, 'Approved');
 
 
 

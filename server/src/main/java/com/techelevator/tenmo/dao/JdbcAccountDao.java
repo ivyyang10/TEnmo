@@ -17,6 +17,17 @@ public class JdbcAccountDao implements AccountDao{
         this.jdbcTemplate = jdbcTemplate;
     }
 
+    public Account getAccount(int userID) {
+        Account account = null;
+        String sql = "SELECT * FROM account " +
+                "WHERE user_id =?;";
+        SqlRowSet result=jdbcTemplate.queryForRowSet(sql,userID);
+        if(result.next()){
+            account=mapRowToAccount(result);
+        }
+        return account;
+    }
+
     @Override
     public BigDecimal getBalance(String userName) {
         String sql ="SELECT * From account " +
