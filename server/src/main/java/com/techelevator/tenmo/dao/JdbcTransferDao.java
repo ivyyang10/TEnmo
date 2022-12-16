@@ -18,12 +18,12 @@ public class JdbcTransferDao implements TransferDao{
 
 
     private JdbcTemplate jdbcTemplate;
-     private JdbcAccountDao accountDao;
 
 
-    public JdbcTransferDao(JdbcTemplate jdbcTemplate, JdbcAccountDao accountDao) {
+
+    public JdbcTransferDao(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
-        this.accountDao = accountDao;
+
     }
 
 
@@ -37,14 +37,12 @@ public class JdbcTransferDao implements TransferDao{
         Integer transferID = jdbcTemplate.queryForObject(sql, Integer.class, transfer.getSenderID(), transfer.getReceiverID(),
                 transfer.getTransferAmount());
         transfer.setTransferID(transferID);
-       // if (accountDao.getBalanceById(transfer.getSenderID()).compareTo(transfer.getTransferAmount()) == -1) {
-            //throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Transfer Amount Exceeds Balance");
-      // } else {
-            accountDao.balanceDecrease(transfer.getSenderID(), transfer.getTransferAmount());
-            accountDao.balanceIncrease(transfer.getReceiverID(), transfer.getTransferAmount());
+            //MOVED BELOW TO THE CONTROLLER TO ALLOW FOR BETTER TESTING
+            //accountDao.balanceDecrease(transfer.getSenderID(), transfer.getTransferAmount());
+            //accountDao.balanceIncrease(transfer.getReceiverID(), transfer.getTransferAmount());
             return getTransfer(transferID);
         }
-    //}
+
     @Override
     public List<Transfer> getAllByUserId(int id) {
         List<Transfer> transfers = new ArrayList<>();

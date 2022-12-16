@@ -4,8 +4,10 @@ import com.techelevator.tenmo.dao.AccountDao;
 import com.techelevator.tenmo.dao.TransferDao;
 import com.techelevator.tenmo.dao.UserDao;
 import com.techelevator.tenmo.model.Transfer;
+import com.techelevator.tenmo.model.User;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -41,6 +43,9 @@ public class TransferController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Logged in user can't transfer to own account");
         }
         else {
+
+            accountDao.balanceDecrease(transfer.getSenderID(), transfer.getTransferAmount());
+            accountDao.balanceIncrease(transfer.getReceiverID(), transfer.getTransferAmount());
             return transferDao.addTransfer(transfer);
         }
         }
@@ -54,12 +59,18 @@ public class TransferController {
     }
 
     //get transfer by transfer id
+
     @RequestMapping (path = "/transfer/{id}", method = RequestMethod.GET)
-    public Transfer getTransferById (@Valid @PathVariable int id){
+    public Transfer getTransferById (@Valid @PathVariable int id, Principal principal){
             Transfer transfer = transferDao.getTransfer(id);
+            String loggedInUser = principal.getName();
+            int userId = userDao.findIdByUsername(loggedInUser);
             if (transfer == null) {
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Location not found");
-            } else {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Transfer not found");
+            } else if(userId != transfer.getSenderID() && userId != transfer.getReceiverID()){
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You can only access transfers associated with your account");
+            }
+            else {
                 return transfer;
             }
         }
