@@ -50,6 +50,7 @@ public class TransferController {
         }
         }
 
+        //send transfer request
         @ResponseStatus(HttpStatus.CREATED)
         @RequestMapping(path = "/transfer/request", method = RequestMethod.POST)
         public Transfer requestTransfer(@Valid @RequestBody Transfer transfer, Principal principal){
@@ -64,16 +65,25 @@ public class TransferController {
             }
     }
 
+
+    //request transfer reject
     @RequestMapping(path = "/transfer/{id}/reject", method = RequestMethod.PUT)
     public void rejectTransfer(@Valid Transfer transfer, @PathVariable int id){
     transferDao.rejectTransfer(transfer, id);
     }
 
+
+    //try to get transferAmount from requestTransfer, but didn't success.
+    //need put transferAmount in body to make account change function work correctly.
     @RequestMapping(path = "/transfer/{id}/approve", method = RequestMethod.PUT)
-    public void acceptTransfer(@Valid Transfer transfer, @PathVariable int id, Principal principal) {
+    public void acceptTransfer(@Valid @RequestBody Transfer transfer, @PathVariable int id, Principal principal) {
         transferDao.approveTransfer(transfer, id);
-        accountDao.balanceDecrease(transfer.getSenderID(), transfer.getTransferAmount());
-        accountDao.balanceIncrease(transfer.getReceiverID(), transfer.getTransferAmount());
+        String loggedInUser = principal.getName();
+        int userId = userDao.findIdByUsername(loggedInUser);
+        transfer.setSenderID(userId);
+        accountDao.balanceDecrease(transfer.getReceiverID(), transfer.getTransferAmount());
+        accountDao.balanceIncrease(transfer.getSenderID(), transfer.getTransferAmount());
+
     }
 
 

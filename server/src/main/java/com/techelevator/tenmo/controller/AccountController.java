@@ -26,7 +26,7 @@ public class AccountController {
         this.accountDao = accountDao;
         this.userDao = userDao;
     }
-    //Check account balance by username
+    //Check own account balance
     @RequestMapping(path="/account/balance", method = RequestMethod.GET)
     public BigDecimal getBalance(Principal principal){
         BigDecimal account = accountDao.getBalance(principal.getName());
